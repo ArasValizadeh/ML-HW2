@@ -13,21 +13,27 @@ def plot_weights(feature_names=None):
     os.makedirs(RESULTS_DIR, exist_ok=True)
 
     model = joblib.load(MODEL_PATH)
-    coefs = model.coef_
 
-    if feature_names is None:
-        feature_names = [f"w{i}" for i in range(len(coefs))]
+    history_path = os.path.join(MODELS_DIR, "weights_history.txt")
+    weights_history = []
+    with open(history_path, "r") as f:
+        for line in f:
+            weights_history.append(list(map(float, line.strip().split(","))))
 
-    indices = np.arange(len(coefs))
+    weights_history = np.array(weights_history)
+    epochs = np.arange(len(weights_history))
+
+    num_features = weights_history.shape[1]
 
     plt.figure()
-    plt.bar(indices, coefs)
-    plt.xticks(indices, feature_names, rotation=45, ha="right")
-    plt.tight_layout()
-    plt.xlabel("Features")
-    plt.ylabel("Weights")
-    plt.title("Linear Regression Weights")
+    for i in range(num_features):
+        plt.plot(epochs, weights_history[:, i], label=f"w{i}")
 
+    plt.xlabel("Epoch")
+    plt.ylabel("Weight Value")
+    plt.title("Weight Convergence During Training")
+    plt.legend()
+    plt.tight_layout()
     plt.savefig(PLOT_PATH)
     plt.close()
 
